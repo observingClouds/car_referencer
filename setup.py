@@ -2,7 +2,10 @@
 
 """The setup script."""
 
+import os
+
 from setuptools import find_packages, setup
+from setuptools.command.develop import develop
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -16,6 +19,15 @@ with open("requirements.txt") as f:
 test_requirements = [
     "pytest>=3",
 ]
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+
+    def run(self):
+        develop.run(self)
+        os.system("go install https://github.com/Jorropo/linux2ipfs.git")
+
 
 setup(
     author="Hauke Schulz",

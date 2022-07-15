@@ -1,0 +1,11 @@
+name: test-env
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+- go
+- go-cgo
+- python>=3.6
+- pip
+- pip:
+  - -r requirements.txt

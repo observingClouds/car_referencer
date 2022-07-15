@@ -21,6 +21,14 @@ Creating parquet file reference system for car collections.
 
 Note this project is still under heavy development and not yet tested properly.
 
+Installation
+------------
+
+```
+git clone https://github.com/observingClouds/car_referencer.git
+cd car_referencer
+pip install .
+```
 
 Credits
 -------

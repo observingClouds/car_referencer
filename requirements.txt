@@ -1,0 +1,6 @@
+tqdm
+pandas
+bases
+numpy
+multiformats
+ipldstore @ git+https://github.com/d70-t/ipldstore

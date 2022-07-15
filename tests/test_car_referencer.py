@@ -2,9 +2,25 @@
 
 """Tests for `car_referencer` package."""
 
+import subprocess
+
 import pytest
+import xarray as xr
 
 from car_referencer import car_referencer
+
+
+def create_test_zarr():
+    xr.tutorial.load_dataset("air_temperature").chunk(
+        {"time": 100, "lat": 5, "lon": 5}
+    ).to_zarr("example.zarr")
+
+
+def create_test_cars(zarr_fn):
+    subprocess.call("echo {} > old-example.json")
+    subprocess.call(
+        "~/go/bin/linux2ipfs -car-size 3382286 -driver car-example.%d.car -incremental-file old-example.json example.zarr"
+    )
 
 
 @pytest.fixture

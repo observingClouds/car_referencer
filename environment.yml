@@ -8,5 +8,11 @@ dependencies:
 - git
 - python>=3.6
 - pip
+- pytest
+- xarray
+- pooch
+- netcdf4
+- dask
+- zarr
 - pip:
   - -r requirements.txt

@@ -6,9 +6,11 @@ import glob
 import os
 import subprocess
 
+import pandas as pd
 import pytest
 import xarray as xr
 
+import car_referencer.index as idx
 from car_referencer import car_referencer
 
 
@@ -53,6 +55,9 @@ def test_content(response):
 
 def test_index_creation(test_cars):
     print(test_cars)
+    index = idx.generate_index(test_cars)
+    assert index is not None
+    assert isinstance(index, pd.DataFrame)
 
 
 def test_preffs_creation():

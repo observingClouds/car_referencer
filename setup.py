@@ -27,7 +27,7 @@ class PostDevelopCommand(develop):
     def run(self):
         develop.run(self)
         print("post dev command")
-        os.system("go install go install github.com/Jorropo/linux2ipfs@latest")
+        os.system("go install -v github.com/Jorropo/linux2ipfs@latest")
 
 
 setup(

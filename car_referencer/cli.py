@@ -19,7 +19,6 @@ def main():
         "-c",
         "--car_files",
         help="Collection of car files. Argument can contain wildcards.",
-        nargs="+",
         required=True,
     )
     parser.add_argument(

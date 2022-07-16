@@ -26,7 +26,8 @@ class PostDevelopCommand(develop):
 
     def run(self):
         develop.run(self)
-        os.system("go install https://github.com/Jorropo/linux2ipfs.git")
+        print("post dev command")
+        os.system("go install go install github.com/Jorropo/linux2ipfs@latest")
 
 
 setup(
@@ -42,6 +43,9 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
+    cmdclass={
+        "develop": PostDevelopCommand,
+    },
     description="Creating parquet file reference system for car collections.",
     entry_points={
         "console_scripts": [

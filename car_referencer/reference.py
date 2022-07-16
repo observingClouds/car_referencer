@@ -35,7 +35,7 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
         if hash.hashfun.code == 18:  # raw
             if hash.codec.name == "dag-pb":
                 ref_fs = loop_create_reffs(
-                    hash, ref_fs, dir="/".join(filter(bool, [dir, name]))
+                    hash, index, ref_fs, dir="/".join(filter(bool, [dir, name]))
                 )
             entry = index.loc[hash.digest]
             if isinstance(entry, pd.DataFrame):

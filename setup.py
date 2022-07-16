@@ -2,7 +2,10 @@
 
 """The setup script."""
 
+import os
+
 from setuptools import find_packages, setup
+from setuptools.command.develop import develop
 
 with open("README.rst") as readme_file:
     readme = readme_file.read()
@@ -17,6 +20,16 @@ test_requirements = [
     "pytest>=3",
 ]
 
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+
+    def run(self):
+        develop.run(self)
+        print("post dev command")
+        os.system("go install -v github.com/Jorropo/linux2ipfs@latest")
+
+
 setup(
     author="Hauke Schulz",
     python_requires=">=3.6",
@@ -30,6 +43,9 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
+    cmdclass={
+        "develop": PostDevelopCommand,
+    },
     description="Creating parquet file reference system for car collections.",
     entry_points={
         "console_scripts": [

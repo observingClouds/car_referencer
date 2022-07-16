@@ -5,6 +5,7 @@ channels:
 dependencies:
 - go
 - go-cgo
+- git
 - python>=3.6
 - pip
 - pip:

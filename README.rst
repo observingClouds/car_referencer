@@ -24,23 +24,23 @@ Note this project is still under heavy development and not yet tested properly.
 Installation
 ------------
 
-```
-git clone https://github.com/observingClouds/car_referencer.git
-cd car_referencer
-pip install .
-```
+.. code-block:: bash
+
+    git clone https://github.com/observingClouds/car_referencer.git
+    cd car_referencer
+    pip install .
 
 Development
 -----------
 
 For testing purposes additional dependencies need to be installed including some packages written in go. The needed environment can be installed by
 
-```
-git clone https://github.com/observingClouds/car_referencer.git
-cd car_referencer
-mamba env create
-source activate test-env
-```
+.. code-block:: bash
+
+    git clone https://github.com/observingClouds/car_referencer.git
+    cd car_referencer
+    mamba env create
+    source activate test-env
 
 Credits
 -------

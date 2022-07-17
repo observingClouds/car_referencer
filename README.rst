@@ -42,6 +42,23 @@ For testing purposes additional dependencies need to be installed including some
     mamba env create
     source activate test-env
 
+Command line usage
+------------------
+
+.. code-block:: bash
+
+    car_referencer -c "carfiles.*.car" -p preffs.parquet -r ROOT-HASH -i index.parquet
+
+The created file preffs.parquet can then be opened by
+
+.. code-block:: python
+
+    import xarray as xr
+
+    ds = xr.open_zarr("preffs:preffs.parquet")
+
+thanks to https://gitlab.gwdg.de/tobi/preffs.
+
 Credits
 -------
 

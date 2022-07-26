@@ -72,6 +72,10 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
                     base64.b64decode(base64.b64encode(hash.raw_digest).decode("ascii")),
                 ]
             )
+        else:
+            raise ValueError(
+                f"Found unknown hash code {hash.hashfun.code}, {name}, {hash.codec.name}"
+            )
     return ref_fs
 
 

@@ -45,9 +45,6 @@ jobs:
           activate-environment: test-env
           python-version: 3.8
       - name: Set up conda environment
-        env:
-          USER: ${{ secrets.GITLAB_GWDG_API_USERNAME }}
-          TOKEN: ${{ secrets.GITLAB_GWDG_API_TOKEN }}
         run: |
           mamba env update -f environment.yml
       - name: Conda info

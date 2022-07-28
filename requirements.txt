@@ -5,4 +5,4 @@ numpy
 multiformats
 pyarrow
 ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs
-preffs @ git+https://${USER}:${TOKEN}@gitlab.gwdg.de/tobi/preffs@main
+preffs @ git+https://github.com/d70-t/preffs@main

@@ -21,17 +21,13 @@ def create_reference_fs(root_cid, index):
 
 
 def list_links(node):
-    d = {link.Name: CID.decode(link.Hash) for link in node.Links}
+    d = [[link.Name, CID.decode(link.Hash)] for link in node.Links]
     return d
 
 
 def loop_create_reffs(cid, index, ref_fs=[], dir=None):
     node, data = create_reference_fs(cid, index)
-    for n, (name, hash) in enumerate(list_links(node).items()):
-        if (
-            name is None
-        ):  # are these fake cids? why do I find those although I'm using the actual root CID
-            continue
+    for n, (name, hash) in enumerate(list_links(node)):
         if hash.hashfun.code == 18:  # raw
             if hash.codec.name == "dag-pb":
                 ref_fs = loop_create_reffs(

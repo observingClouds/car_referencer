@@ -26,7 +26,7 @@ def generate_index(carfiles, index_fn=None):
     )
     df["order"] = np.arange(len(df))  # needed for duplicate entries
     df = df.set_index("cid")
-    df = df.sort_index()
+    df = df.sort_index(kind="stable")
     if index_fn:
         save_index(df, index_fn)
     return df

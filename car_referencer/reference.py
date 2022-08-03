@@ -25,6 +25,16 @@ def list_links(node):
     return d
 
 
+def get_size(blocksizes, n, entry):
+    if blocksizes != []:
+        offset = entry.offset + sum(blocksizes[0:n])
+        size = blocksizes[n]
+    else:
+        offset = entry.offset
+        size = entry["size"]
+    return offset, size
+
+
 def loop_create_reffs(cid, index, ref_fs=[], dir=None):
     node, data = create_reference_fs(cid, index)
     for n, (name, hash) in enumerate(list_links(node)):
@@ -41,8 +51,10 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
                         [
                             "/".join(filter(bool, [dir, name])),
                             e.file,
-                            e.offset,
-                            e["size"],
+                            # e.offset,
+                            # e["size"],
+                            get_size(data.blocksizes, n, e)[0],
+                            get_size(data.blocksizes, n, e)[1],
                             None,
                         ]
                         for _, e in entry.iterrows()
@@ -53,8 +65,10 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
                     [
                         "/".join(filter(bool, [dir, name])),
                         entry.file,
-                        entry.offset,
-                        entry["size"],
+                        # entry.offset,
+                        # entry["size"],
+                        get_size(data.blocksizes, n, entry)[0],
+                        get_size(data.blocksizes, n, entry)[1],
                         None,
                     ]
                 )

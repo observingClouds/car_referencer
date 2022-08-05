@@ -119,7 +119,6 @@ def create_preffs(cid, index, parquet_fn=None):
         ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"
     )
     df_preffs = df_preffs.sort_index(kind="stable")
-    df_preffs = df_preffs.convert_dtypes()
     if parquet_fn:
         df_preffs.to_parquet(parquet_fn)
     return df_preffs

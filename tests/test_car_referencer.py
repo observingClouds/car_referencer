@@ -94,7 +94,7 @@ def test_zarr_preffs(tmp_test_folder):
 def test_codecs_preffs_creation(
     tmp_test_folder,
     cid="QmfZwnbqm2fmfBLtcfWT7fdr3VaPUB4fMB6SsypkiMNRFV",
-    test_car=["test.car"],
+    test_car=["tests/test.car"],
 ):
     index = idx.generate_index(test_car)
     assert isinstance(index, pd.DataFrame)

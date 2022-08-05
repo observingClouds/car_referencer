@@ -48,17 +48,32 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
             if verbose:
                 print(dir, index.loc[cid.digest])
             entry = index.loc[cid.digest]
-            ref_fs.extend(
-                [
+            if isinstance(entry, pd.DataFrame):
+                entry = entry.sort_values("order")
+                ref_fs.extend(
                     [
-                        dir,
-                        entry.file,
-                        entry.offset,
-                        entry["size"],
-                        None,
+                        [
+                            dir,
+                            e.file,
+                            e.offset,
+                            e["size"],
+                            None,
+                        ]
+                        for _, e in entry.iterrows()
                     ]
-                ]
-            )
+                )
+            else:  # single entry
+                ref_fs.extend(
+                    [
+                        [
+                            dir,
+                            entry.file,
+                            entry.offset,
+                            entry["size"],
+                            None,
+                        ]
+                    ]
+                )
     else:
         node, data = create_reference_fs(cid, index)
         len_links = len(list_links(node))

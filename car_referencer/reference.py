@@ -114,7 +114,7 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
 
 
 def create_preffs(cid, index, parquet_fn=None):
-    ref_fs = loop_create_reffs(cid, index)
+    ref_fs = loop_create_reffs(cid, index, ref_fs=[])
     df_preffs = pd.DataFrame.from_records(
         ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"
     )

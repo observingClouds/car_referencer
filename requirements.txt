@@ -3,6 +3,7 @@ pandas
 bases
 numpy
 multiformats
+pytables
 pyarrow
 ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs
 preffs @ git+https://github.com/d70-t/preffs@main

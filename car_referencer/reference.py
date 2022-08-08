@@ -1,6 +1,7 @@
 import base64
 
 import pandas as pd
+import tables
 from ipldstore.unixfsv1 import Data, PBNode
 from multiformats import CID
 
@@ -25,7 +26,16 @@ def list_links(node):
     return d
 
 
-def loop_create_reffs(cid, index, ref_fs=[], dir=None):
+class Reference(tables.IsDescription):
+    key = tables.StringCol(100)
+    path = tables.StringCol(100)
+    offset = tables.Int64Col()
+    size = tables.Int64Col()
+    raw = tables.StringCol(100)
+
+
+def loop_create_reffs(cid, index, table, dir=None):
+    reference = table.row
     node, data = create_reference_fs(cid, index)
     for n, (name, hash) in enumerate(list_links(node).items()):
         if (
@@ -34,54 +44,54 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
             continue
         if hash.hashfun.code == 18:  # raw
             if hash.codec.name == "dag-pb":
-                ref_fs = loop_create_reffs(
-                    hash, index, ref_fs, dir="/".join(filter(bool, [dir, name]))
+                loop_create_reffs(
+                    hash, index, table, dir="/".join(filter(bool, [dir, name]))
                 )
             entry = index.loc[hash.digest]
             if isinstance(entry, pd.DataFrame):
                 entry = entry.sort_values("order")
-                ref_fs.extend(
-                    [
-                        [
-                            "/".join(filter(bool, [dir, name])),
-                            e.file,
-                            e.offset,
-                            e["size"],
-                            None,
-                        ]
-                        for _, e in entry.iterrows()
-                    ]
-                )
+                for _, e in entry.iterrows():
+                    reference["key"] = "/".join(filter(bool, [dir, name]))
+                    reference["path"] = e.file
+                    reference["offset"] = e.offset
+                    reference["size"] = e["size"]
+                    reference["raw"] = None
+                    table.append()
             else:  # single entry per zarr-file
-                ref_fs.append(
-                    [
-                        "/".join(filter(bool, [dir, name])),
-                        entry.file,
-                        entry.offset,
-                        entry["size"],
-                        None,
-                    ]
-                )
+                reference["key"] = "/".join(filter(bool, [dir, name]))
+                reference["path"] = entry.file
+                reference["offset"] = entry.offset
+                reference["size"] = entry["size"]
+                reference["raw"] = None
+                table.append()
         elif hash.hashfun.code == 0:  # identity
-            ref_fs.append(
-                [
-                    "/".join(filter(bool, [dir, name])),
-                    None,
-                    None,
-                    None,
-                    base64.b64decode(base64.b64encode(hash.raw_digest).decode("ascii")),
-                ]
+            reference["key"] = "/".join(filter(bool, [dir, name]))
+            reference["path"] = None
+            reference["offset"] = None
+            reference["size"] = None
+            reference["raw"] = base64.b64decode(
+                base64.b64encode(hash.raw_digest).decode("ascii")
             )
-    return ref_fs
+            table.append()
+    if n > 10000:
+        table.flush()
+    return
 
 
 def create_preffs(cid, index, parquet_fn=None):
-    ref_fs = loop_create_reffs(cid, index)
-    df_preffs = pd.DataFrame.from_records(
-        ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"
+    h5file = tables.open_file(
+        "car_references.h5.partial", mode="w", title="Car references"
     )
-    df_preffs = df_preffs.sort_index(kind="stable")
-    df_preffs = df_preffs.convert_dtypes()
-    if parquet_fn:
-        df_preffs.to_parquet(parquet_fn)
-    return df_preffs
+    table = h5file.create_table("/", "references", Reference, "Readout example")
+
+    loop_create_reffs(cid, index, table)
+    table.flush()
+
+    # df_preffs = pd.DataFrame.from_records(
+    #    ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"
+    # )
+    # df_preffs = df_preffs.sort_index(kind="stable")
+    # df_preffs = df_preffs.convert_dtypes()
+    # if parquet_fn:
+    #    df_preffs.to_parquet(parquet_fn)
+    # return df_preffs

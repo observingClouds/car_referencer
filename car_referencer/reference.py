@@ -1,6 +1,7 @@
 import base64
 
 import pandas as pd
+import tqdm
 from ipldstore.unixfsv1 import Data, PBNode
 from multiformats import CID
 
@@ -78,7 +79,7 @@ def loop_create_reffs(cid, index, ref_fs=[], dir=None):
         node, data = create_reference_fs(cid, index)
         len_links = len(list_links(node))
         if cid.codec.name == "dag-pb" and len_links > 0:
-            for n, (name, hash) in enumerate(list_links(node)):
+            for n, (name, hash) in enumerate(tqdm.tqdm(list_links(node))):
                 ref_fs = loop_create_reffs(
                     hash, index, ref_fs, dir="/".join(filter(bool, [dir, name]))
                 )

@@ -4,6 +4,7 @@ bases
 numpy
 multiformats
 pytables
+h5py
 pyarrow
 ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs
 preffs @ git+https://github.com/d70-t/preffs@main

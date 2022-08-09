@@ -1,5 +1,6 @@
 import base64
 
+import h5py
 import pandas as pd
 import tables
 from ipldstore.unixfsv1 import Data, PBNode

@@ -1,4 +1,5 @@
 import base64
+import os
 
 import h5py
 import numpy as np
@@ -35,7 +36,7 @@ class Reference(tables.IsDescription):
     path = tables.StringCol(1000)
     offset = tables.Float64Col(dflt=-1)
     size = tables.Float64Col(dflt=-1)
-    raw = tables.StringCol(10000)
+    raw = tables.StringCol(1000)
 
 
 def loop_create_reffs(cid, index, table, dir=None):
@@ -44,25 +45,11 @@ def loop_create_reffs(cid, index, table, dir=None):
         if cid.hashfun.codec.name == "identity":
             if verbose:
                 print(
-                    "here",
                     dir,
                     base64.b64decode(base64.b64encode(cid.raw_digest).decode("ascii")),
                 )
-                print(
-                    "length",
-                    len(
-                        base64.b64decode(
-                            base64.b64encode(cid.raw_digest).decode("ascii")
-                        )
-                    ),
-                )
             reference["key"] = dir
-            # reference["path"] = entry["file"]
-            # reference["offset"] = entry["offset"]+6
-            # reference["size"] = data.filesize
-            reference["raw"] = base64.b64decode(
-                base64.b64encode(cid.raw_digest).decode("ascii")
-            )
+            reference["raw"] = base64.b64encode(cid.raw_digest).decode("ascii")
             reference.append()
         else:
             if verbose:
@@ -75,14 +62,12 @@ def loop_create_reffs(cid, index, table, dir=None):
                     reference["path"] = e.file
                     reference["offset"] = e.offset
                     reference["size"] = e["size"]
-                    # reference["raw"] = None
                     reference.append()
             else:  # single entry per zarr-file
                 reference["key"] = dir
                 reference["path"] = entry.file
                 reference["offset"] = entry.offset
                 reference["size"] = entry["size"]
-                # reference["raw"] = None
                 reference.append()
     else:
         node, data = create_reference_fs(cid, index)
@@ -111,6 +96,14 @@ def loop_create_reffs(cid, index, table, dir=None):
     return table
 
 
+def decode_raw(x):
+    "Convert ascii byte-string to bytes"
+    if x is None:
+        return None
+    else:
+        return base64.b64decode(x)
+
+
 def create_preffs(cid, index, parquet_fn=None):
     h5file = tables.open_file(
         "car_references.h5.partial", mode="w", title="Car references"
@@ -119,16 +112,19 @@ def create_preffs(cid, index, parquet_fn=None):
 
     table = loop_create_reffs(cid, index, table)
     table.flush()
-    h5 = h5py.File("car_references.h5.partial")
+    h5file.close()
+    os.rename("car_references.h5.partial", "car_references.h5")
+    h5 = h5py.File("car_references.h5")
     df_preffs = pd.DataFrame.from_records(
         h5["references"], columns=["key", "offset", "path", "raw", "size"], index="key"
     )
-    # df_preffs = df_preffs.convert_dtypes()
+    h5.close()
+    os.remove("car_references.h5")
     df_preffs.index = list(map(lambda x: x.decode(), df_preffs.index))
     df_preffs["path"] = list(map(lambda x: x.decode(), df_preffs["path"]))
     df_preffs["path"] = df_preffs["path"].replace("", None)
     df_preffs["raw"] = df_preffs["raw"].replace(b"", None)
-
+    df_preffs["raw"] = list(map(lambda x: decode_raw(x), df_preffs["raw"]))
     df_preffs["size"] = df_preffs["size"].replace(-1, np.nan)
     df_preffs["offset"] = df_preffs["offset"].replace(-1, np.nan)
     df_preffs = df_preffs.reindex(columns=["path", "offset", "size", "raw"])

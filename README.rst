@@ -13,7 +13,7 @@ car_referencer: Creating parquet file reference system for car collections.
 Similar to tape archive (tar) files, `content addressable archive <https://ipld.io/specs/transport/car/>`_ (car) files are a possibility to group objects to larger quantities.
 Besides uploading these car files to an object store, they also pose the possibility to save the collections of objects on a traditional filesystem. Accessing these collections without the need of extracting the individual objects can be realized by the usage of a reference file system.
 
-car_referencer can create the needed reference file from single ``car`` s or multiple ``car`` s that are part of the same merkle DAG.
+``car_referencer`` can create the needed reference file from single ``car`` s or multiple ``car`` s that are part of the same merkle DAG.
 
 Command line usage
 ------------------
@@ -32,7 +32,7 @@ The created file ``preffs.parquet`` can then be opened by
 
     ds = xr.open_zarr("preffs:preffs.parquet")
 
-thanks to https://gitlab.gwdg.de/tobi/preffs.
+thanks to https://github.com/d70-t/preffs.
 
 
 Installation

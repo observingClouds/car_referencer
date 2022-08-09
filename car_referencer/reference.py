@@ -106,9 +106,9 @@ def decode_raw(x):
 
 def create_preffs(cid, index, parquet_fn=None):
     h5file = tables.open_file(
-        "car_references.h5.partial", mode="w", title="Car references"
+        "car_references.h5.partial", mode="w", title="Temporary car reference file"
     )
-    table = h5file.create_table("/", "references", Reference, "Readout example")
+    table = h5file.create_table("/", "references", Reference, "Car references")
 
     table = loop_create_reffs(cid, index, table)
     table.flush()

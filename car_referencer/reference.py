@@ -7,7 +7,7 @@ import tables
 from ipldstore.unixfsv1 import Data, PBNode
 from multiformats import CID
 
-verbose = True
+verbose = False
 
 
 def load_data(data):

@@ -1,6 +1,7 @@
 import base64
 
 import h5py
+import numpy as np
 import pandas as pd
 import tables
 from ipldstore.unixfsv1 import Data, PBNode
@@ -28,11 +29,11 @@ def list_links(node):
 
 
 class Reference(tables.IsDescription):
-    key = tables.StringCol(100)
-    path = tables.StringCol(100)
-    offset = tables.Int64Col()
-    size = tables.Int64Col()
-    raw = tables.StringCol(100)
+    key = tables.StringCol(1000)
+    path = tables.StringCol(1000)
+    offset = tables.Float64Col(dflt=np.nan)
+    size = tables.Float64Col(dflt=np.nan)
+    raw = tables.StringCol(10000)
 
 
 def loop_create_reffs(cid, index, table, dir=None):
@@ -54,15 +55,15 @@ def loop_create_reffs(cid, index, table, dir=None):
                 for _, e in entry.iterrows():
                     reference["key"] = "/".join(filter(bool, [dir, name]))
                     reference["path"] = e.file
-                    reference["offset"] = int(e.offset)
-                    reference["size"] = int(e["size"])
-                    # reference["raw"] = None
+                    reference["offset"] = e.offset
+                    reference["size"] = e["size"]
+                    reference["raw"] = None
                     reference.append()
             else:  # single entry per zarr-file
                 reference["key"] = "/".join(filter(bool, [dir, name]))
                 reference["path"] = entry.file
-                reference["offset"] = int(entry.offset)
-                reference["size"] = int(entry["size"])
+                reference["offset"] = entry.offset
+                reference["size"] = entry["size"]
                 # reference["raw"] = None
                 reference.append()
         elif hash.hashfun.code == 0:  # identity
@@ -97,6 +98,7 @@ def create_preffs(cid, index, parquet_fn=None):
     df_preffs = df_preffs.reindex(columns=["path", "offset", "size", "raw"])
     df_preffs.index = list(map(lambda x: x.decode(), df_preffs.index))
     df_preffs["path"] = list(map(lambda x: x.decode(), df_preffs["path"]))
+    df_preffs["raw"] = df_preffs["raw"].replace(b"", None)
     if parquet_fn:
         df_preffs.to_parquet(parquet_fn)
     return df_preffs

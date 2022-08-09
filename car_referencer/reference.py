@@ -31,9 +31,9 @@ def list_links(node):
 class Reference(tables.IsDescription):
     key = tables.StringCol(1000)
     path = tables.StringCol(1000)
-    offset = tables.Float64Col(dflt=np.nan)
-    size = tables.Float64Col(dflt=np.nan)
-    raw = tables.StringCol(10000)
+    offset = tables.Float64Col(dflt=-1)
+    size = tables.Float64Col(dflt=-1)
+    raw = tables.StringCol(1000)
 
 
 def loop_create_reffs(cid, index, table, dir=None):
@@ -57,7 +57,7 @@ def loop_create_reffs(cid, index, table, dir=None):
                     reference["path"] = e.file
                     reference["offset"] = e.offset
                     reference["size"] = e["size"]
-                    reference["raw"] = None
+                    # reference["raw"] = None
                     reference.append()
             else:  # single entry per zarr-file
                 reference["key"] = "/".join(filter(bool, [dir, name]))
@@ -75,6 +75,9 @@ def loop_create_reffs(cid, index, table, dir=None):
                 base64.b64encode(hash.raw_digest).decode("ascii")
             )
             reference.append()
+            print(
+                len(base64.b64decode(base64.b64encode(hash.raw_digest).decode("ascii")))
+            )
     if n > 10000:
         table.flush()
     return
@@ -94,11 +97,16 @@ def create_preffs(cid, index, parquet_fn=None):
         h5["references"], columns=["key", "offset", "path", "raw", "size"], index="key"
     )
     df_preffs = df_preffs.sort_index(kind="stable")
-    df_preffs = df_preffs.convert_dtypes()
-    df_preffs = df_preffs.reindex(columns=["path", "offset", "size", "raw"])
+    # df_preffs = df_preffs.convert_dtypes()
     df_preffs.index = list(map(lambda x: x.decode(), df_preffs.index))
     df_preffs["path"] = list(map(lambda x: x.decode(), df_preffs["path"]))
+    df_preffs["path"] = df_preffs["path"].replace("", None)
     df_preffs["raw"] = df_preffs["raw"].replace(b"", None)
+
+    df_preffs["size"] = df_preffs["size"].replace(-1, np.nan)
+    df_preffs["offset"] = df_preffs["offset"].replace(-1, np.nan)
+    df_preffs = df_preffs.reindex(columns=["path", "offset", "size", "raw"])
+
     if parquet_fn:
         df_preffs.to_parquet(parquet_fn)
     return df_preffs

@@ -54,26 +54,26 @@ def loop_create_reffs(cid, index, table, dir=None):
                 for _, e in entry.iterrows():
                     reference["key"] = "/".join(filter(bool, [dir, name]))
                     reference["path"] = e.file
-                    reference["offset"] = e.offset
-                    reference["size"] = e["size"]
-                    reference["raw"] = None
-                    table.append()
+                    reference["offset"] = int(e.offset)
+                    reference["size"] = int(e["size"])
+                    # reference["raw"] = None
+                    reference.append()
             else:  # single entry per zarr-file
                 reference["key"] = "/".join(filter(bool, [dir, name]))
                 reference["path"] = entry.file
-                reference["offset"] = entry.offset
-                reference["size"] = entry["size"]
-                reference["raw"] = None
-                table.append()
+                reference["offset"] = int(entry.offset)
+                reference["size"] = int(entry["size"])
+                # reference["raw"] = None
+                reference.append()
         elif hash.hashfun.code == 0:  # identity
             reference["key"] = "/".join(filter(bool, [dir, name]))
-            reference["path"] = None
-            reference["offset"] = None
-            reference["size"] = None
+            # reference["path"] = None
+            # reference["offset"] = None
+            # reference["size"] = None
             reference["raw"] = base64.b64decode(
                 base64.b64encode(hash.raw_digest).decode("ascii")
             )
-            table.append()
+            reference.append()
     if n > 10000:
         table.flush()
     return
@@ -87,12 +87,16 @@ def create_preffs(cid, index, parquet_fn=None):
 
     loop_create_reffs(cid, index, table)
     table.flush()
+    h5 = h5py.File("car_references.h5.partial")
 
-    # df_preffs = pd.DataFrame.from_records(
-    #    ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"
-    # )
-    # df_preffs = df_preffs.sort_index(kind="stable")
-    # df_preffs = df_preffs.convert_dtypes()
-    # if parquet_fn:
-    #    df_preffs.to_parquet(parquet_fn)
-    # return df_preffs
+    df_preffs = pd.DataFrame.from_records(
+        h5["references"], columns=["key", "offset", "path", "raw", "size"], index="key"
+    )
+    df_preffs = df_preffs.sort_index(kind="stable")
+    df_preffs = df_preffs.convert_dtypes()
+    df_preffs = df_preffs.reindex(columns=["path", "offset", "size", "raw"])
+    df_preffs.index = list(map(lambda x: x.decode(), df_preffs.index))
+    df_preffs["path"] = list(map(lambda x: x.decode(), df_preffs["path"]))
+    if parquet_fn:
+        df_preffs.to_parquet(parquet_fn)
+    return df_preffs

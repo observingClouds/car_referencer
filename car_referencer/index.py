@@ -20,12 +20,15 @@ def save_index(df, filename):
 
 
 def generate_index(carfiles, index_fn=None):
-    df = pd.DataFrame(
+    index = pd.DataFrame(
         tqdm.tqdm(chain.from_iterable(map(read_car, carfiles))),
         columns=["cid", "file", "offset", "size"],
     )
-    df["order"] = np.arange(len(df))  # needed for duplicate entries
-    df = df.set_index("cid")
+    index["order"] = np.arange(len(index))  # needed for duplicate entries
+    index = index.set_index("cid")
+    index = index.sort_index()
+    index.drop_duplicates(inplace=True)
+    assert index.index.is_monotonic
     if index_fn:
-        save_index(df, index_fn)
-    return df
+        save_index(index, index_fn)
+    return index

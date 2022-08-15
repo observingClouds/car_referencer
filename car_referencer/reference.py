@@ -63,10 +63,6 @@ def gen_refs(index, root, path=None):
 
 
 def create_preffs(root_cid, index, parquet_fn=None):
-    index = index.sort_index()
-    index = index[~index.index.duplicated()]
-    assert index.index.is_monotonic
-
     ref_fs = gen_refs(index, root_cid)
     df_preffs = pd.DataFrame.from_records(
         ref_fs, columns=["key", "path", "offset", "size", "raw"], index="key"

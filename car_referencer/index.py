@@ -4,8 +4,6 @@ import ipldstore
 import numpy as np
 import pandas as pd
 import tqdm
-from ipldstore.unixfsv1 import Data, PBLink, PBNode
-from multiformats import CID
 
 
 def read_car(carfile):

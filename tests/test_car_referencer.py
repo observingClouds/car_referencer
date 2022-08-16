@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 import xarray as xr
 from multiformats import CID
-from xarray.testing import assert_allclose, assert_equal
+from xarray.testing import assert_equal
 
 import car_referencer.index as idx
 import car_referencer.reference as ref

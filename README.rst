@@ -30,7 +30,7 @@ The created file ``preffs.parquet`` can then be opened by
 
     import xarray as xr
 
-    ds = xr.open_zarr("preffs:preffs.parquet")
+    ds = xr.open_zarr("preffs::preffs.parquet")
 
 thanks to https://github.com/d70-t/preffs.
 

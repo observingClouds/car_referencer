@@ -41,8 +41,19 @@ def create_test_zarr_complex(tmp_test_folder):
 
 
 @pytest.fixture(scope="session")
-def test_linux2ipfs_cars(tmp_test_folder):
-    create_test_zarr_complex(tmp_test_folder)
+def test_linux2ipfs_cars(tmp_test_folder, creator=create_test_zarr_simple):
+    """
+    Create car files with linux2ipfs
+
+    Input
+    -----
+    tmp_test_folder : str
+      temporary folder where car file should be written to
+    creator : function
+      function that creates a specific zarr file
+    """
+
+    creator(tmp_test_folder)
     with open(f"{str(tmp_test_folder)}/old-example.json", "w") as f:
         f.write("{}")
     if os.environ.get("GOPATH"):
@@ -51,7 +62,9 @@ def test_linux2ipfs_cars(tmp_test_folder):
         gopath = os.environ["HOME"] + "/go/bin"
     assert os.path.exists(gopath + "/linux2ipfs"), "linux2ipfs could not be found"
     subprocess.check_output(
-        f"{gopath}/linux2ipfs -car-size 3382286 -driver car-{str(tmp_test_folder)}/example.%d.car -incremental-file {str(tmp_test_folder)}/old-example.json {str(tmp_test_folder)}/example.zarr",
+        f"{gopath}/linux2ipfs -car-size 3382286 -driver"
+        f" car-{str(tmp_test_folder)}/example.%d.car -incremental-file"
+        f" {str(tmp_test_folder)}/old-example.json {str(tmp_test_folder)}/example.zarr",
         shell=True,
     )
     return sorted(glob.glob(f"{str(tmp_test_folder)}/example.*.car"))

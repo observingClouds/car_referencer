@@ -36,7 +36,10 @@ def main():
     parser.add_argument(
         "-r",
         "--cid",
-        help="Root CID. Recursive references of this CID will be added to the reference filesystem",
+        help=(
+            "Root CID. Recursive references of this CID will be added to the reference"
+            " filesystem"
+        ),
         required=True,
     )
     args = parser.parse_args()

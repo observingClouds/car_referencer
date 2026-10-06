@@ -1,18 +1,18 @@
 name: test-env
 channels:
-  - defaults
   - conda-forge
+  - nodefaults
 dependencies:
 - go
 - go-cgo
 - git
-- python>=3.6
+- python=3.13
 - pip
 - pytest
 - xarray
 - pooch
 - netcdf4
 - dask
-- zarr
+- zarr<3
 - pip:
   - -r requirements.txt

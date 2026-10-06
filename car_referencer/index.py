@@ -26,7 +26,7 @@ def generate_index(carfiles, index_fn=None):
     index = index.set_index("cid")
     index = index.sort_index()
     index.drop_duplicates(inplace=True)
-    assert index.index.is_monotonic
+    assert index.index.is_monotonic_increasing
     if index_fn:
         save_index(index, index_fn)
     return index

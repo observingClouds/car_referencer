@@ -1,4 +1,5 @@
 """Console script for car_referencer."""
+
 import argparse
 import glob
 import logging

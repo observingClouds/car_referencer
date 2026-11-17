@@ -13,6 +13,9 @@
 
 ### Bug fixes
 
+- Fix reference creation when the same block is contained in several car
+  files. `generate_index` now keeps only the first occurrence of each CID
+  ([#9](https://github.com/observingClouds/car_referencer/issues/9)).
 - Fix `generate_index` with pandas 2.0 and newer, which removed
   `Index.is_monotonic`
   ([#27](https://github.com/observingClouds/car_referencer/pull/27)).
@@ -25,6 +28,14 @@
 
 ### Internal changes
 
+- Add tests for file nodes with multiple (and repeated) chunks that are
+  spread across several car files
+  ([#9](https://github.com/observingClouds/car_referencer/issues/9)).
+- Move from `setup.py`, `requirements.txt` and a conda environment to
+  `pyproject.toml` and [uv](https://docs.astral.sh/uv/) with a `uv.lock`.
+  CI installs go with `actions/setup-go` instead of conda, as
+  `setup-miniconda` no longer works on the GitHub runners. Pin
+  `xarray<2026.9` for the tests, as newer releases require `zarr>=3`.
 - Fix the CI test environment: install from conda-forge only, and pin
   Python 3.13 and `zarr<3`
   ([#27](https://github.com/observingClouds/car_referencer/pull/27)).

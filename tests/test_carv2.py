@@ -54,8 +54,10 @@ def carv2_bytes(roots, blocks, index="multihash", padding=0):
         else:
             by_code = {}
             for cid, off in entries:
+                # like go-car, the keys are the raw digests without the
+                # multihash prefix
                 by_code.setdefault(cid.hashfun.code, []).append(
-                    (bytes(cid.digest), off)
+                    (bytes(cid.raw_digest), off)
                 )
             index_bytes = varint.encode(idx.MULTIHASH_INDEX_SORTED)
             index_bytes += struct.pack("<i", len(by_code))

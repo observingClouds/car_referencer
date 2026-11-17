@@ -43,6 +43,7 @@ source = { editable = "." }
 dependencies = [
     { name = "bases" },
     { name = "dag-cbor" },
+    { name = "fsspec" },
     { name = "ipldstore" },
     { name = "multiformats" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -88,6 +89,7 @@ test = [
 requires-dist = [
     { name = "bases" },
     { name = "dag-cbor", specifier = "<0.3" },
+    { name = "fsspec" },
     { name = "ipldstore", git = "https://github.com/d70-t/ipldstore?rev=unixfs" },
     { name = "multiformats" },
     { name = "numpy" },

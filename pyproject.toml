@@ -26,7 +26,6 @@ dependencies = [
     "multiformats",
     "pyarrow",
     "ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs",
-    "preffs @ git+https://github.com/d70-t/preffs@main",
     # newer releases removed APIs that ipldstore@unixfs imports
     "dag-cbor<0.3",
     "pure-protobuf<3",
@@ -41,6 +40,9 @@ car_referencer = "car_referencer.cli:main"
 
 [dependency-groups]
 test = [
+    # reading the created reference files
+    "preffs @ git+https://github.com/d70-t/preffs@main",
+    "fsspec",
     "pytest",
     "xarray<2026.9",  # newer releases require zarr>=3
     "pooch",

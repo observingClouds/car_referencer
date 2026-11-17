@@ -2,8 +2,18 @@
 
 ## Unreleased
 
+### Breaking changes
+
+- `preffs` is no longer installed as a dependency. It is only needed to
+  read preffs reference files and has to be installed separately.
+
 ### New features
 
+- Create kerchunk/fsspec reference files (version 1 JSON) with
+  `create_references` or `car_referencer -f kerchunk` / `-o *.json`, as an
+  alternative to preffs. Files that consist of several chunks can be
+  inlined with `--inline-chunked`. The output option is now called
+  `-o/--output`; `-p/--parquet` still works.
 - Support CARv2 files. If a CARv2 file contains an index (`IndexSorted` or
   `MultihashIndexSorted`), it is used to locate the blocks; otherwise the
   data payload is scanned. In both cases only the section headers are read,
@@ -13,6 +23,7 @@
 
 ### Bug fixes
 
+- Fix the command line interface when no index file (`-i`) is given.
 - Fix reference creation when the same block is contained in several car
   files. `generate_index` now keeps only the first occurrence of each CID
   ([#9](https://github.com/observingClouds/car_referencer/issues/9)).

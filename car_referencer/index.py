@@ -22,10 +22,12 @@ def generate_index(carfiles, index_fn=None):
         tqdm.tqdm(chain.from_iterable(map(read_car, carfiles))),
         columns=["cid", "file", "offset", "size"],
     )
-    index["order"] = np.arange(len(index))  # needed for duplicate entries
+    index["order"] = np.arange(len(index))
     index = index.set_index("cid")
-    index = index.sort_index()
-    index.drop_duplicates(inplace=True)
+    index = index.sort_index(kind="stable")
+    # The same block can be contained in several car files. All copies have
+    # the same content, so only the first occurrence is kept.
+    index = index[~index.index.duplicated(keep="first")]
     assert index.index.is_monotonic_increasing
     if index_fn:
         save_index(index, index_fn)

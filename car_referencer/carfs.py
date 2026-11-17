@@ -337,7 +337,9 @@ class CARFileSystem(AbstractFileSystem):
         if ranges:
             by_fs = {}
             for i, (car, s, e) in enumerate(ranges):
-                by_fs.setdefault(id(car.fs), (car.fs, []))[1].append((i, car.path, s, e))
+                by_fs.setdefault(id(car.fs), (car.fs, []))[1].append(
+                    (i, car.path, s, e)
+                )
             results = [None] * len(ranges)
             for fs, items in by_fs.values():
                 data = fs.cat_ranges(

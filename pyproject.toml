@@ -32,6 +32,10 @@ dependencies = [
     "typing-validation<2",
 ]
 
+[project.optional-dependencies]
+# needed to read reference files in the preffs format
+preffs = ["preffs @ git+https://github.com/d70-t/preffs@main"]
+
 [project.urls]
 Homepage = "https://github.com/observingClouds/car_referencer"
 
@@ -41,7 +45,7 @@ car_referencer = "car_referencer.cli:main"
 [dependency-groups]
 test = [
     # reading the created reference files
-    "preffs @ git+https://github.com/d70-t/preffs@main",
+    "car_referencer[preffs]",
     "fsspec",
     "pytest",
     "xarray<2026.9",  # newer releases require zarr>=3

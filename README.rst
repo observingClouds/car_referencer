@@ -30,7 +30,7 @@ preffs
 
     car_referencer -c "carfiles.*.car" -o preffs.parquet -r ROOT-HASH -i index.parquet
 
-The created file ``preffs.parquet`` can be opened with `preffs <https://github.com/d70-t/preffs>`_, which needs to be installed separately (``pip install git+https://github.com/d70-t/preffs``):
+The created file ``preffs.parquet`` can be opened with `preffs <https://github.com/d70-t/preffs>`_, which is an optional dependency (``pip install car_referencer[preffs]``):
 
 .. code-block:: python
 
@@ -85,6 +85,8 @@ Installation
     git clone https://github.com/observingClouds/car_referencer.git
     cd car_referencer
     pip install .
+
+To also install `preffs <https://github.com/d70-t/preffs>`_ for reading preffs reference files, use ``pip install ".[preffs]"``.
 
 Development
 -----------

@@ -57,8 +57,14 @@ dependencies = [
     { name = "typing-validation" },
 ]
 
+[package.optional-dependencies]
+preffs = [
+    { name = "preffs" },
+]
+
 [package.dev-dependencies]
 dev = [
+    { name = "car-referencer", extra = ["preffs"] },
     { name = "dask" },
     { name = "fsspec" },
     { name = "netcdf4", version = "1.7.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -66,7 +72,6 @@ dev = [
     { name = "pooch" },
     { name = "pre-commit", version = "4.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pre-commit", version = "4.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "preffs" },
     { name = "pytest" },
     { name = "xarray", version = "2025.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "xarray", version = "2026.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -74,12 +79,12 @@ dev = [
     { name = "zarr", version = "2.18.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
 test = [
+    { name = "car-referencer", extra = ["preffs"] },
     { name = "dask" },
     { name = "fsspec" },
     { name = "netcdf4", version = "1.7.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "netcdf4", version = "1.7.5.1.post1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pooch" },
-    { name = "preffs" },
     { name = "pytest" },
     { name = "xarray", version = "2025.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "xarray", version = "2026.7.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -95,30 +100,32 @@ requires-dist = [
     { name = "multiformats" },
     { name = "numpy" },
     { name = "pandas" },
+    { name = "preffs", marker = "extra == 'preffs'", git = "https://github.com/d70-t/preffs?rev=main" },
     { name = "pure-protobuf", specifier = "<3" },
     { name = "pyarrow" },
     { name = "tqdm" },
     { name = "typing-validation", specifier = "<2" },
 ]
+provides-extras = ["preffs"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "car-referencer", extras = ["preffs"] },
     { name = "dask" },
     { name = "fsspec" },
     { name = "netcdf4" },
     { name = "pooch" },
     { name = "pre-commit" },
-    { name = "preffs", git = "https://github.com/d70-t/preffs?rev=main" },
     { name = "pytest" },
     { name = "xarray", specifier = "<2026.9" },
     { name = "zarr", specifier = "<3" },
 ]
 test = [
+    { name = "car-referencer", extras = ["preffs"] },
     { name = "dask" },
     { name = "fsspec" },
     { name = "netcdf4" },
     { name = "pooch" },
-    { name = "preffs", git = "https://github.com/d70-t/preffs?rev=main" },
     { name = "pytest" },
     { name = "xarray", specifier = "<2026.9" },
     { name = "zarr", specifier = "<3" },

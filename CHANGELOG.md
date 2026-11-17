@@ -4,8 +4,8 @@
 
 ### Breaking changes
 
-- `preffs` is no longer installed as a dependency. It is only needed to
-  read preffs reference files and has to be installed separately.
+- `preffs` is now an optional dependency (`car_referencer[preffs]`). It is
+  only needed to read preffs reference files.
 
 ### New features
 

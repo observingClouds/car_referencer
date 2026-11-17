@@ -1,6 +1,6 @@
-==============
+===========================================================================
 car_referencer: Creating parquet file reference system for car collections.
-==============
+===========================================================================
 
 .. image:: https://github.com/observingClouds/car_referencer/actions/workflows/ci.yaml/badge.svg
         :target: https://github.com/observingClouds/car_referencer/actions
@@ -37,6 +37,12 @@ thanks to https://github.com/d70-t/preffs.
 
 Installation
 ------------
+
+.. code-block:: bash
+
+    pip install car_referencer
+
+or from source
 
 .. code-block:: bash
 

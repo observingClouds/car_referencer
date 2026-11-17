@@ -118,11 +118,17 @@ Deploying
 ---------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
+Make sure all your changes are committed (including an entry in CHANGELOG.md).
 Then run::
 
 $ bump2version patch # possible: major / minor / patch
 $ git push
 $ git push --tags
 
-Travis will then deploy to PyPI if tests pass.
+Then create a GitHub release for the new tag. The ``Publish to PyPI``
+workflow builds the package and uploads it to PyPI via trusted publishing.
+
+One-time setup: add a trusted publisher on PyPI for the repository
+``observingClouds/car_referencer``, the workflow ``pypi.yaml`` and the
+environment ``pypi``, and create the ``pypi`` environment in the GitHub
+repository settings.

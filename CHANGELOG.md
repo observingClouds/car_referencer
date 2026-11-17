@@ -16,6 +16,11 @@
 
 ### Internal changes
 
+- Add a workflow that builds the package and publishes it to PyPI when a
+  GitHub release is published. Include `requirements.txt` in the sdist,
+  fix the README title for PyPI, build a Python 3 only wheel and fix the
+  `bump2version` configuration
+  ([#10](https://github.com/observingClouds/car_referencer/issues/10)).
 - Fix the CI test environment: install from conda-forge only, and pin
   Python 3.13 and `zarr<3`
   ([#27](https://github.com/observingClouds/car_referencer/pull/27)).

@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "car_referencer"
+description = "Creating parquet file reference system for car collections."
+readme = "README.rst"
+license = { text = "GNU General Public License v3" }
+authors = [{ name = "Hauke Schulz", email = "hauke.schulz@mpimet.mpg.de" }]
+keywords = ["car_referencer"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+]
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+    "tqdm",
+    "pandas",
+    "bases",
+    "numpy",
+    "multiformats",
+    "pyarrow",
+    "ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs",
+    "preffs @ git+https://github.com/d70-t/preffs@main",
+    # newer releases removed APIs that ipldstore@unixfs imports
+    "dag-cbor<0.3",
+    "pure-protobuf<3",
+    "typing-validation<2",
+]
+
+[project.urls]
+Homepage = "https://github.com/observingClouds/car_referencer"
+
+[project.scripts]
+car_referencer = "car_referencer.cli:main"
+
+[dependency-groups]
+test = [
+    "pytest",
+    "xarray<2026.9",  # newer releases require zarr>=3
+    "pooch",
+    "netcdf4",
+    "dask",
+    "zarr<3",  # preffs does not work with zarr 3 yet
+]
+dev = [{ include-group = "test" }, "pre-commit"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.setuptools.dynamic]
+version = { attr = "car_referencer.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["car_referencer", "car_referencer.*"]

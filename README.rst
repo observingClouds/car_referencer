@@ -47,14 +47,15 @@ Installation
 Development
 -----------
 
-For testing purposes additional dependencies need to be installed including some packages written in go. The needed environment can be installed by
+The development environment is managed with `uv <https://docs.astral.sh/uv/>`_. The tests additionally need `linux2ipfs <https://github.com/Jorropo/linux2ipfs>`_, which is written in go:
 
 .. code-block:: bash
 
     git clone https://github.com/observingClouds/car_referencer.git
     cd car_referencer
-    mamba env create
-    source activate test-env
+    uv sync
+    go install github.com/Jorropo/linux2ipfs@latest
+    uv run pytest
 
 Credits
 -------

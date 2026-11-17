@@ -25,6 +25,7 @@ dependencies = [
     "numpy",
     "multiformats",
     "pyarrow",
+    "fsspec",
     "ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs",
     "preffs @ git+https://github.com/d70-t/preffs@main",
     # newer releases removed APIs that ipldstore@unixfs imports
@@ -38,6 +39,9 @@ Homepage = "https://github.com/observingClouds/car_referencer"
 
 [project.scripts]
 car_referencer = "car_referencer.cli:main"
+
+[project.entry-points."fsspec.specs"]
+car = "car_referencer.carfs:CARFileSystem"
 
 [dependency-groups]
 test = [

@@ -35,6 +35,32 @@ The created file ``preffs.parquet`` can then be opened by
 
 thanks to https://github.com/d70-t/preffs.
 
+fsspec filesystem for indexed CARv2 files
+-----------------------------------------
+
+CARv2 files that contain an index can also be opened directly, without
+creating a reference file first. The ``car`` filesystem reads the CARv2 header
+and the index and then serves the UnixFS directories and files of the DAG with
+ranged reads into the CAR file(s). The CAR files can be stored on any fsspec
+filesystem:
+
+.. code-block:: python
+
+    import fsspec
+    import xarray as xr
+
+    fs = fsspec.filesystem("car", fo="s3://bucket/example.car")
+    fs.ls("/")
+
+    # or use URL chaining
+    ds = xr.open_zarr("car://example.zarr::s3://bucket/example.car")
+
+By default, the first root listed in the CAR header is the root of the
+filesystem. Use ``root="<CID>"`` to choose another UnixFS node, and pass a list
+of files as ``fo`` if the blocks of the DAG are distributed over several CAR
+files. An index can be added to existing CAR files with
+``car index`` from `go-car <https://github.com/ipld/go-car>`_.
+
 
 Installation
 ------------

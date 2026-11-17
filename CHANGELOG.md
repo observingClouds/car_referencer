@@ -10,6 +10,12 @@
   which makes indexing CARv2 files faster than CARv1 files. CARv1 and CARv2
   files can be mixed
   ([#8](https://github.com/observingClouds/car_referencer/issues/8)).
+- Add `CARFileSystem`, an fsspec filesystem (protocol `car`) for indexed
+  CARv2 files. It reads only the CARv2 header and index up front and serves
+  UnixFS directories and files with ranged reads directly from the CAR
+  file(s), which can be stored on any fsspec filesystem. No separate
+  reference file is needed, e.g.
+  `xr.open_zarr("car://example.zarr::s3://bucket/example.car")`.
 
 ### Bug fixes
 

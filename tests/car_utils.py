@@ -55,3 +55,44 @@ def carv1_bytes(roots, blocks):
 def write_carv1(filename, roots, blocks):
     with open(filename, "wb") as f:
         f.write(carv1_bytes(roots, blocks))
+
+
+def assert_matches_ipldstore(carfile):
+    """Check car_referencer's CARv1 reader and UnixFS decoder against
+    ipldstore for all blocks in ``carfile``. Returns the number of decoded
+    dag-pb blocks."""
+    import ipldstore
+    from ipldstore import unixfsv1
+
+    import car_referencer.index as idx
+    from car_referencer import unixfs
+
+    with open(carfile, "rb") as f:
+        _, blocks = ipldstore.car.read_car(f)
+        expected = [
+            (cid, data, loc.payload_offset, loc.payload_size)
+            for cid, data, loc in blocks
+        ]
+    actual = list(idx.read_carv1(str(carfile), verify=True))
+    assert [(cid.digest, off, size) for cid, _, off, size in expected] == [
+        (digest, off, size) for digest, _, off, size in actual
+    ]
+
+    n_dag_pb = 0
+    for cid, data, _, _ in expected:
+        if cid.codec.name != "dag-pb":
+            continue
+        n_dag_pb += 1
+        node = unixfs.PBNode.loads(data)
+        node_ref = unixfsv1.PBNode.loads(data)
+        assert node.Data == node_ref.Data
+        assert [(lk.Hash, lk.Name, lk.Tsize) for lk in node.Links] == [
+            (lk.Hash, lk.Name, lk.Tsize) for lk in node_ref.Links
+        ]
+        meta = unixfs.Data.loads(node.Data)
+        meta_ref = unixfsv1.Data.loads(node_ref.Data)
+        assert int(meta.Type) == int(meta_ref.Type)
+        assert meta.Data == meta_ref.Data
+        assert meta.filesize == meta_ref.filesize
+        assert list(meta.blocksizes) == list(meta_ref.blocksizes)
+    return n_dag_pb

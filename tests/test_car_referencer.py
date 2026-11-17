@@ -18,7 +18,13 @@ from xarray.testing import assert_equal
 import car_referencer.index as idx
 import car_referencer.reference as ref
 
-from .car_utils import directory_node, file_node, raw_block, write_carv1
+from .car_utils import (
+    assert_matches_ipldstore,
+    directory_node,
+    file_node,
+    raw_block,
+    write_carv1,
+)
 
 
 @pytest.fixture(scope="session")
@@ -181,3 +187,7 @@ def test_multi_entry_preffs(multi_entry_cars, tmp_test_folder):
     assert sorted(m.keys()) == sorted(expected.keys())
     for key, content in expected.items():
         assert m[key] == content
+
+
+def test_linux2ipfs_cars_match_ipldstore(test_linux2ipfs_cars):
+    assert sum(map(assert_matches_ipldstore, test_linux2ipfs_cars)) > 0

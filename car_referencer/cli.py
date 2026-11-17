@@ -43,13 +43,20 @@ def main():
         ),
         required=True,
     )
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="Check all blocks against their CIDs while creating the index.",
+    )
     args = parser.parse_args()
     if os.path.exists(args.index):
         logging.info(f"Index file {args.index} exists and will be used.")
         index_df = pd.read_parquet(args.index)
     else:
         logging.info("Creating index of available CIDs in given car files")
-        index_df = idx.generate_index(glob.glob(args.car_files), args.index)
+        index_df = idx.generate_index(
+            glob.glob(args.car_files), args.index, verify=args.verify
+        )
 
     logging.info("Create reference filesystem for {args['cid']}.")
 

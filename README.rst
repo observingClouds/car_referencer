@@ -14,6 +14,7 @@ Similar to tape archive (tar) files, `content addressable archive <https://ipld.
 Besides uploading these car files to an object store, they also pose the possibility to save the collections of objects on a traditional filesystem. Accessing these collections without the need of extracting the individual objects can be realized by the usage of a reference file system.
 
 ``car_referencer`` can create the needed reference file from single ``car`` s or multiple ``car`` s that are part of the same merkle DAG.
+Both `CARv1 <https://ipld.io/specs/transport/car/carv1/>`_ and `CARv2 <https://ipld.io/specs/transport/car/carv2/>`_ files are supported. For CARv2 files the included index is used to speed up the creation of the index file.
 
 Command line usage
 ------------------

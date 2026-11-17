@@ -12,19 +12,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-      - name: Install build tools
-        run: python -m pip install build twine
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
       - name: Build sdist and wheel
-        run: python -m build
+        run: uv build
       - name: Check distribution metadata
-        run: python -m twine check --strict dist/*
+        run: uvx twine check --strict dist/*
       - name: Check for direct URL dependencies
         # PyPI rejects packages that depend on e.g. git+https://... URLs
         run: |
-          python - <<'PY'
+          uv run --no-project python - <<'PY'
           import glob, sys, zipfile
           wheel, = glob.glob("dist/*.whl")
           with zipfile.ZipFile(wheel) as z:

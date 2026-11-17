@@ -14,6 +14,7 @@ Similar to tape archive (tar) files, `content addressable archive <https://ipld.
 Besides uploading these car files to an object store, they also pose the possibility to save the collections of objects on a traditional filesystem. Accessing these collections without the need of extracting the individual objects can be realized by the usage of a reference file system.
 
 ``car_referencer`` can create the needed reference file from single ``car`` s or multiple ``car`` s that are part of the same merkle DAG.
+Both `CARv1 <https://ipld.io/specs/transport/car/carv1/>`_ and `CARv2 <https://ipld.io/specs/transport/car/carv2/>`_ files are supported. For CARv2 files the included index is used to speed up the creation of the index file.
 
 Command line usage
 ------------------
@@ -53,14 +54,15 @@ or from source
 Development
 -----------
 
-For testing purposes additional dependencies need to be installed including some packages written in go. The needed environment can be installed by
+The development environment is managed with `uv <https://docs.astral.sh/uv/>`_. The tests additionally need `linux2ipfs <https://github.com/Jorropo/linux2ipfs>`_, which is written in go:
 
 .. code-block:: bash
 
     git clone https://github.com/observingClouds/car_referencer.git
     cd car_referencer
-    mamba env create
-    source activate test-env
+    uv sync
+    go install github.com/Jorropo/linux2ipfs@latest
+    uv run pytest
 
 Credits
 -------

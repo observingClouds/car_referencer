@@ -16,6 +16,11 @@
 
 ### Internal changes
 
+- Move from `setup.py`, `requirements.txt` and a conda environment to
+  `pyproject.toml` and [uv](https://docs.astral.sh/uv/) with a `uv.lock`.
+  CI installs go with `actions/setup-go` instead of conda, as
+  `setup-miniconda` no longer works on the GitHub runners. Pin
+  `xarray<2026.9` for the tests, as newer releases require `zarr>=3`.
 - Fix the CI test environment: install from conda-forge only, and pin
   Python 3.13 and `zarr<3`
   ([#27](https://github.com/observingClouds/car_referencer/pull/27)).

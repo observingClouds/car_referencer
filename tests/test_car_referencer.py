@@ -56,13 +56,13 @@ def test_linux2ipfs_cars(tmp_test_folder, creator=create_test_zarr_simple):
     creator(tmp_test_folder)
     with open(f"{str(tmp_test_folder)}/old-example.json", "w") as f:
         f.write("{}")
-    if os.environ.get("GOPATH"):
-        gopath = os.environ["GOPATH"] + "/go/bin"
-    else:
-        gopath = os.environ["HOME"] + "/go/bin"
-    assert os.path.exists(gopath + "/linux2ipfs"), "linux2ipfs could not be found"
+    linux2ipfs = shutil.which("linux2ipfs")
+    if linux2ipfs is None:
+        gopath = subprocess.check_output(["go", "env", "GOPATH"], text=True).strip()
+        linux2ipfs = os.path.join(gopath, "bin", "linux2ipfs")
+    assert os.path.exists(linux2ipfs), "linux2ipfs could not be found"
     subprocess.check_output(
-        f"{gopath}/linux2ipfs -car-size 3382286 -driver"
+        f"{linux2ipfs} -car-size 3382286 -driver"
         f" car-{str(tmp_test_folder)}/example.%d.car -incremental-file"
         f" {str(tmp_test_folder)}/old-example.json {str(tmp_test_folder)}/example.zarr",
         shell=True,

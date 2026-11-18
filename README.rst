@@ -21,11 +21,16 @@ Command line usage
 
 ``car_referencer`` creates the reference file internally in two steps. The first step is to identify all available references within the provided ``car`` s ( here ``carfiles.*.car``) and save this as an index file (e.g. ``index.parquet``) that will be reused if it already exists. In a second step the reference file (e.g. ``preffs.parquet``) is created based on the ``ROOT-HASH`` that identifies NOT the root-CID of the car file, but the root-CID of the root file-object. In case of a zarr file, like ``example.zarr``, the ROOT-CID would refer to ``example.zarr`` itself.
 
+Two formats of reference files are supported, selected with ``-f/--format``. By default the format is chosen by the extension of the output file: ``.json`` creates kerchunk references, everything else creates preffs references.
+
+preffs
+~~~~~~
+
 .. code-block:: bash
 
-    car_referencer -c "carfiles.*.car" -p preffs.parquet -r ROOT-HASH -i index.parquet
+    car_referencer -c "carfiles.*.car" -o preffs.parquet -r ROOT-HASH -i index.parquet
 
-The created file ``preffs.parquet`` can then be opened by
+The created file ``preffs.parquet`` can be opened with `preffs <https://github.com/d70-t/preffs>`_, which is an optional dependency (``pip install car_referencer[preffs]``):
 
 .. code-block:: python
 
@@ -33,7 +38,43 @@ The created file ``preffs.parquet`` can then be opened by
 
     ds = xr.open_zarr("preffs::preffs.parquet")
 
-thanks to https://github.com/d70-t/preffs.
+kerchunk / fsspec
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    car_referencer -c "carfiles.*.car" -o references.json -r ROOT-HASH -i index.parquet
+
+The created file follows the `kerchunk reference specification (version 1) <https://fsspec.github.io/kerchunk/spec.html>`_ and can be opened with ``fsspec`` alone:
+
+.. code-block:: python
+
+    import xarray as xr
+
+    ds = xr.open_dataset(
+        "reference://",
+        engine="zarr",
+        backend_kwargs={
+            "consolidated": False,
+            "storage_options": {"fo": "references.json"},
+        },
+    )
+
+In this format every file maps to a single byte range. Files that are split into several chunks inside the car files (e.g. large zarr chunks) can therefore not be referenced directly. ``car_referencer`` raises an error for such files unless ``--inline-chunked`` is given, which copies their content into the reference file. preffs references do not have this limitation.
+
+Python usage
+~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from multiformats import CID
+
+    from car_referencer.index import generate_index
+    from car_referencer.reference import create_preffs, create_references
+
+    index = generate_index(["carfiles.0.car", "carfiles.1.car"])
+    create_preffs(CID.decode("ROOT-HASH"), index, parquet_fn="preffs.parquet")
+    create_references(CID.decode("ROOT-HASH"), index, json_fn="references.json")
 
 
 Installation
@@ -44,6 +85,8 @@ Installation
     git clone https://github.com/observingClouds/car_referencer.git
     cd car_referencer
     pip install .
+
+To also install `preffs <https://github.com/d70-t/preffs>`_ for reading preffs reference files, use ``pip install ".[preffs]"``.
 
 Development
 -----------

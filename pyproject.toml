@@ -25,9 +25,12 @@ dependencies = [
     "numpy",
     "multiformats",
     "pyarrow",
-    "preffs @ git+https://github.com/d70-t/preffs@main",
     "dag-cbor",
 ]
+
+[project.optional-dependencies]
+# needed to read reference files in the preffs format
+preffs = ["preffs @ git+https://github.com/d70-t/preffs@main"]
 
 [project.urls]
 Homepage = "https://github.com/observingClouds/car_referencer"
@@ -37,6 +40,9 @@ car_referencer = "car_referencer.cli:main"
 
 [dependency-groups]
 test = [
+    # reading the created reference files
+    "car_referencer[preffs]",
+    "fsspec",
     # independent CAR reader and UnixFS encoder/decoder for the tests
     "ipfsspec",
     "pytest",

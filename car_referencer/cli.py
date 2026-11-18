@@ -23,10 +23,34 @@ def main():
         required=True,
     )
     parser.add_argument(
+        "-o",
+        "--output",
         "-p",
         "--parquet",
-        help="Parquet reference filename to be created.",
+        dest="output",
+        help="Reference filename to be created.",
         required=True,
+    )
+    parser.add_argument(
+        "-f",
+        "--format",
+        choices=["preffs", "kerchunk"],
+        default=None,
+        help=(
+            "Format of the reference file: 'preffs' (parquet) or 'kerchunk'"
+            " (fsspec reference JSON). Default: 'kerchunk' if the output"
+            " filename ends with '.json', otherwise 'preffs'."
+        ),
+    )
+    parser.add_argument(
+        "--inline-chunked",
+        action="store_true",
+        help=(
+            "kerchunk format only: copy the content of files that consist of"
+            " several chunks into the reference file. Without this option such"
+            " files raise an error, as kerchunk references can only point to a"
+            " single byte range per file."
+        ),
     )
     parser.add_argument(
         "-i",
@@ -49,7 +73,13 @@ def main():
         help="Check all blocks against their CIDs while creating the index.",
     )
     args = parser.parse_args()
-    if os.path.exists(args.index):
+    fmt = args.format
+    if fmt is None:
+        fmt = "kerchunk" if args.output.endswith(".json") else "preffs"
+    if args.inline_chunked and fmt != "kerchunk":
+        parser.error("--inline-chunked is only supported for the kerchunk format")
+
+    if args.index and os.path.exists(args.index):
         logging.info(f"Index file {args.index} exists and will be used.")
         index_df = pd.read_parquet(args.index)
     else:
@@ -58,9 +88,15 @@ def main():
             glob.glob(args.car_files), args.index, verify=args.verify
         )
 
-    logging.info("Create reference filesystem for {args['cid']}.")
+    logging.info(f"Create {fmt} reference filesystem for {args.cid}.")
 
-    _ = ref.create_preffs(CID.decode(args.cid), index_df, parquet_fn=args.parquet)
+    root = CID.decode(args.cid)
+    if fmt == "kerchunk":
+        ref.create_references(
+            root, index_df, json_fn=args.output, inline_chunked=args.inline_chunked
+        )
+    else:
+        ref.create_preffs(root, index_df, parquet_fn=args.output)
 
     return 0
 

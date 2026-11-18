@@ -189,5 +189,102 @@ def test_multi_entry_preffs(multi_entry_cars, tmp_test_folder):
         assert m[key] == content
 
 
+def test_zarr_references(zarr_cids, test_linux2ipfs_cars, tmp_test_folder):
+    index = idx.generate_index(test_linux2ipfs_cars)
+    zarr_root_cid = list(zarr_cids["cids"].values())[0]["cid"]
+    json_fn = str(tmp_test_folder) + "/references.json"
+    refs = ref.create_references(CID.decode(zarr_root_cid), index, json_fn=json_fn)
+    assert refs["version"] == 1
+    with open(json_fn) as f:
+        assert json.load(f) == refs
+
+    ds_refs = xr.open_dataset(
+        "reference://",
+        engine="zarr",
+        backend_kwargs={"consolidated": False, "storage_options": {"fo": json_fn}},
+    )
+    ds_fs = xr.open_zarr(f"{str(tmp_test_folder)}/example.zarr")
+    assert ds_fs.attrs == ds_refs.attrs
+    assert_equal(ds_refs, ds_fs)
+
+
+def test_codecs_references(
+    cid="QmfZwnbqm2fmfBLtcfWT7fdr3VaPUB4fMB6SsypkiMNRFV",
+    test_car=["tests/test.car"],
+):
+    index = idx.generate_index(test_car)
+    cid = CID.decode(cid)
+    # test.car contains a file that is split into several chunks
+    with pytest.raises(ValueError, match="'multi' consists of"):
+        ref.create_references(cid, index)
+    refs = ref.create_references(cid, index, inline_chunked=True)
+    fs = fsspec.filesystem("reference", fo=refs)
+    files = fs.ls("", detail=False)
+    assert files
+    for file in files:
+        assert fs.cat(file) == b"ipfsspec test data"
+
+
+def test_multi_entry_references(multi_entry_cars):
+    files, root, expected = multi_entry_cars
+    index = idx.generate_index(files)
+
+    # kerchunk references cannot point to several byte ranges per file
+    with pytest.raises(ValueError, match="'chunked' consists of 4 chunks"):
+        ref.create_references(root, index)
+
+    refs = ref.create_references(root, index, inline_chunked=True)
+    path, offset, size = refs["refs"]["single"]
+    assert path in files
+    assert size == len(expected["single"])
+    assert isinstance(refs["refs"]["chunked"], str)  # inlined
+
+    fs = fsspec.filesystem("reference", fo=refs)
+    for key, content in expected.items():
+        assert fs.cat(key) == content
+
+
+def test_inline_encoding():
+    assert ref._inline(b"text") == "text"
+    assert ref._inline(b"\x00\xff") == "base64:AP8="
+    # text that looks like base64 encoded data must be encoded itself
+    assert ref._inline(b"base64:abc") == "base64:YmFzZTY0OmFiYw=="
+
+
+@pytest.mark.parametrize(
+    "output, extra_args, reader",
+    [
+        ("refs.parquet", [], "preffs"),
+        ("refs.json", [], "reference"),
+        ("refs.kerchunk", ["-f", "kerchunk", "--inline-chunked"], "reference"),
+    ],
+)
+def test_cli(multi_entry_cars, tmp_path, monkeypatch, output, extra_args, reader):
+    files, root, expected = multi_entry_cars
+    output = str(tmp_path / output)
+    if reader == "reference" and "--inline-chunked" not in extra_args:
+        # the chunked file cannot be referenced in kerchunk format
+        with pytest.raises(ValueError):
+            _run_cli(monkeypatch, files, root, output, extra_args)
+        extra_args = extra_args + ["--inline-chunked"]
+    assert _run_cli(monkeypatch, files, root, output, extra_args) == 0
+
+    if reader == "preffs":
+        m = fsspec.get_mapper(f"preffs::{output}")
+    else:
+        m = fsspec.get_mapper("reference://", fo=output)
+    for key, content in expected.items():
+        assert m[key] == content
+
+
+def _run_cli(monkeypatch, files, root, output, extra_args):
+    from car_referencer import cli
+
+    car_glob = files[0].replace(".0.car", ".*.car")
+    argv = ["car_referencer", "-c", car_glob, "-o", output, "-r", str(root)]
+    monkeypatch.setattr("sys.argv", argv + extra_args)
+    return cli.main()
+
+
 def test_linux2ipfs_cars_match_ipfsspec(test_linux2ipfs_cars):
     assert sum(map(assert_matches_ipfsspec, test_linux2ipfs_cars)) > 0

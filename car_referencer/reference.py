@@ -2,8 +2,9 @@ import mmap
 from functools import lru_cache
 
 import pandas as pd
-from ipldstore.unixfsv1 import Data, DataType, PBNode
 from multiformats import CID
+
+from .unixfs import Data, DataType, PBNode
 
 
 def load_dag_pb(data):

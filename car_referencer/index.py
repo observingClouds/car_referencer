@@ -3,7 +3,6 @@ import struct
 from itertools import chain
 
 import dag_cbor
-import ipldstore
 import numpy as np
 import pandas as pd
 import tqdm
@@ -93,28 +92,71 @@ def _read_carv2_index(buf, pos):
     return None
 
 
-def read_carv2(carfile):
+def _read_carv1_header(buf, pos, carfile):
+    """Check the CARv1 header at ``pos`` and return the first section offset."""
+    header_size, pos = _uvarint(buf, pos)
+    header = dag_cbor.decode(bytes(buf[pos : pos + header_size]))
+    if not isinstance(header, dict) or header.get("version") != 1:
+        raise ValueError(f"{carfile} does not contain a valid CARv1 header")
+    return pos + header_size
+
+
+def _scan_sections(buf, pos, end):
+    """Yield the sections between ``pos`` and ``end`` of a CARv1 payload."""
+    while pos < end:
+        if buf[pos] == 0:  # zero-length section, treated as end of data
+            return
+        cid, payload_offset, size, pos = _read_section(buf, pos)
+        yield cid, payload_offset, size
+
+
+def _blocks(carfile, buf, sections, verify):
+    for cid, payload_offset, size in sections:
+        if verify:
+            data = buf[payload_offset : payload_offset + size]
+            if cid.hashfun.digest(data) != cid.digest:
+                raise ValueError(
+                    f"{carfile} is corrupted. Block '{cid}' could not be verified"
+                )
+        yield cid.digest, carfile, payload_offset, size
+
+
+def _mmap(carfile):
+    with open(carfile, "rb") as f:
+        return mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+
+
+def read_carv1(carfile, verify=False):
+    """Yield ``(digest, file, offset, size)`` for each block in a CARv1 file.
+
+    Only the section headers are read. With ``verify=True`` the block data is
+    read as well and checked against the CID.
+    """
+    buf = _mmap(carfile)
+    try:
+        first_section = _read_carv1_header(buf, 0, carfile)
+        sections = _scan_sections(buf, first_section, len(buf))
+        yield from _blocks(carfile, buf, sections, verify)
+    finally:
+        buf.close()
+
+
+def read_carv2(carfile, verify=False):
     """Yield ``(digest, file, offset, size)`` for each block in a CARv2 file.
 
     If the file contains a supported index, it is used to locate the blocks.
     Otherwise the sections of the data payload are scanned. In both cases only
-    the section headers are read, the block data is neither read nor verified.
+    the section headers are read. With ``verify=True`` the block data is read
+    as well and checked against the CID.
     """
-    with open(carfile, "rb") as f:
-        buf = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+    buf = _mmap(carfile)
     try:
         if buf[: len(CARV2_PRAGMA)] != CARV2_PRAGMA:
             raise ValueError(f"{carfile} is not a CARv2 file")
         data_offset, data_size, index_offset = struct.unpack_from(
             "<QQQ", buf, len(CARV2_PRAGMA) + 16
         )
-        data_end = data_offset + data_size
-
-        header_size, pos = _uvarint(buf, data_offset)
-        header = dag_cbor.decode(bytes(buf[pos : pos + header_size]))
-        if not isinstance(header, dict) or header.get("version") != 1:
-            raise ValueError(f"{carfile} does not contain a CARv1 data payload")
-        first_section = pos + header_size
+        first_section = _read_carv1_header(buf, data_offset, carfile)
 
         offsets = None
         if index_offset:
@@ -122,14 +164,13 @@ def read_carv2(carfile):
         if offsets is not None:
             # identity CIDs are usually not indexed, but they are not looked
             # up in the index anyway
-            for offset in sorted(set(offsets)):
-                cid, payload_offset, size, _ = _read_section(buf, data_offset + offset)
-                yield cid.digest, carfile, payload_offset, size
+            sections = (
+                _read_section(buf, data_offset + offset)[:3]
+                for offset in sorted(set(offsets))
+            )
         else:
-            pos = first_section
-            while pos < data_end:
-                cid, payload_offset, size, pos = _read_section(buf, pos)
-                yield cid.digest, carfile, payload_offset, size
+            sections = _scan_sections(buf, first_section, data_offset + data_size)
+        yield from _blocks(carfile, buf, sections, verify)
     finally:
         buf.close()
 
@@ -139,29 +180,35 @@ def is_carv2(carfile):
         return f.read(len(CARV2_PRAGMA)) == CARV2_PRAGMA
 
 
-def read_carv1(carfile):
-    with open(carfile, "rb") as f:
-        roots, blocks = ipldstore.car.read_car(f)
-        for cid, data, location in blocks:
-            yield cid.digest, carfile, location.payload_offset, location.payload_size
-
-
-def read_car(carfile):
+def read_car(carfile, verify=False):
     """Yield ``(digest, file, offset, size)`` for each block in a CARv1 or
     CARv2 file."""
     if is_carv2(carfile):
-        yield from read_carv2(carfile)
+        yield from read_carv2(carfile, verify=verify)
     else:
-        yield from read_carv1(carfile)
+        yield from read_carv1(carfile, verify=verify)
 
 
 def save_index(df, filename):
     df.to_parquet(filename)
 
 
-def generate_index(carfiles, index_fn=None):
+def generate_index(carfiles, index_fn=None, verify=False):
+    """Create an index of all blocks in the given car files.
+
+    Parameters
+    ----------
+    carfiles : list of str
+        CARv1 and/or CARv2 files
+    index_fn : str, optional
+        Filename of the parquet file the index is written to
+    verify : bool, default False
+        Read all blocks and check them against their CIDs. This is
+        considerably slower, as all data has to be read.
+    """
+    blocks = chain.from_iterable(read_car(fn, verify=verify) for fn in carfiles)
     index = pd.DataFrame(
-        tqdm.tqdm(chain.from_iterable(map(read_car, carfiles))),
+        tqdm.tqdm(blocks),
         columns=["cid", "file", "offset", "size"],
     )
     index["order"] = np.arange(len(index))

@@ -4,11 +4,11 @@
 
 ### New features
 
+- `generate_index(..., verify=True)` and `car_referencer --verify` check all
+  blocks against their CIDs while creating the index.
 - Support CARv2 files. If a CARv2 file contains an index (`IndexSorted` or
   `MultihashIndexSorted`), it is used to locate the blocks; otherwise the
-  data payload is scanned. In both cases only the section headers are read,
-  which makes indexing CARv2 files faster than CARv1 files. CARv1 and CARv2
-  files can be mixed
+  data payload is scanned. CARv1 and CARv2 files can be mixed
   ([#8](https://github.com/observingClouds/car_referencer/issues/8)).
 
 ### Bug fixes
@@ -22,9 +22,12 @@
 
 ### Dependencies
 
-- Require `dag-cbor<0.3`, `pure-protobuf<3` and `typing-validation<2`.
-  Newer releases removed APIs that `ipldstore@unixfs` imports
-  ([#27](https://github.com/observingClouds/car_referencer/pull/27)).
+- `ipldstore` is no longer a dependency. car_referencer reads CARv1 files
+  and decodes dag-pb/UnixFS nodes itself. This also removes the pins of
+  `dag-cbor`, `pure-protobuf` and `typing-validation`. CARv1 files are now
+  indexed by reading only the section headers, like CARv2 files; blocks are
+  no longer hashed unless `verify=True` is given. The tests use `ipfsspec`
+  from PyPI instead of `ipldstore` to build and cross-check car files.
 
 ### Internal changes
 

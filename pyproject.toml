@@ -25,11 +25,7 @@ dependencies = [
     "numpy",
     "multiformats",
     "pyarrow",
-    "ipldstore @ git+https://github.com/d70-t/ipldstore@unixfs",
-    # newer releases removed APIs that ipldstore@unixfs imports
-    "dag-cbor<0.3",
-    "pure-protobuf<3",
-    "typing-validation<2",
+    "dag-cbor",
 ]
 
 [project.optional-dependencies]
@@ -47,6 +43,8 @@ test = [
     # reading the created reference files
     "car_referencer[preffs]",
     "fsspec",
+    # independent CAR reader and UnixFS encoder/decoder for the tests
+    "ipfsspec",
     "pytest",
     "xarray<2026.9",  # newer releases require zarr>=3
     "pooch",

@@ -18,7 +18,13 @@ from xarray.testing import assert_equal
 import car_referencer.index as idx
 import car_referencer.reference as ref
 
-from .car_utils import directory_node, file_node, raw_block, write_carv1
+from .car_utils import (
+    assert_matches_ipfsspec,
+    directory_node,
+    file_node,
+    raw_block,
+    write_carv1,
+)
 
 
 @pytest.fixture(scope="session")
@@ -278,3 +284,7 @@ def _run_cli(monkeypatch, files, root, output, extra_args):
     argv = ["car_referencer", "-c", car_glob, "-o", output, "-r", str(root)]
     monkeypatch.setattr("sys.argv", argv + extra_args)
     return cli.main()
+
+
+def test_linux2ipfs_cars_match_ipfsspec(test_linux2ipfs_cars):
+    assert sum(map(assert_matches_ipfsspec, test_linux2ipfs_cars)) > 0

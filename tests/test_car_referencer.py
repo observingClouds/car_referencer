@@ -19,7 +19,7 @@ import car_referencer.index as idx
 import car_referencer.reference as ref
 
 from .car_utils import (
-    assert_matches_ipldstore,
+    assert_matches_ipfsspec,
     directory_node,
     file_node,
     raw_block,
@@ -189,5 +189,5 @@ def test_multi_entry_preffs(multi_entry_cars, tmp_test_folder):
         assert m[key] == content
 
 
-def test_linux2ipfs_cars_match_ipldstore(test_linux2ipfs_cars):
-    assert sum(map(assert_matches_ipldstore, test_linux2ipfs_cars)) > 0
+def test_linux2ipfs_cars_match_ipfsspec(test_linux2ipfs_cars):
+    assert sum(map(assert_matches_ipfsspec, test_linux2ipfs_cars)) > 0

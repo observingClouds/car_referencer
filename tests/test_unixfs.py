@@ -7,7 +7,7 @@ import car_referencer.index as idx
 from car_referencer import unixfs
 
 from .car_utils import (
-    assert_matches_ipldstore,
+    assert_matches_ipfsspec,
     carv1_bytes,
     directory_node,
     file_node,
@@ -16,18 +16,18 @@ from .car_utils import (
 )
 
 
-def test_test_car_matches_ipldstore():
-    assert assert_matches_ipldstore("tests/test.car") > 0
+def test_test_car_matches_ipfsspec():
+    assert assert_matches_ipfsspec("tests/test.car") > 0
 
 
-def test_synthetic_car_matches_ipldstore(tmp_path):
+def test_synthetic_car_matches_ipfsspec(tmp_path):
     a = raw_block(b"first chunk|")
     b = raw_block(b"second chunk|")
     chunked = file_node([a, b, a])
     root = directory_node({"chunked": chunked, "ünïcödé name": file_node([b])})
     car = tmp_path / "test.car"
     write_carv1(car, [root[0]], [root, chunked, a, b])
-    assert assert_matches_ipldstore(car) == 2
+    assert assert_matches_ipfsspec(car) == 2
 
 
 def test_packed_blocksizes():

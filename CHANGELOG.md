@@ -26,7 +26,8 @@
   and decodes dag-pb/UnixFS nodes itself. This also removes the pins of
   `dag-cbor`, `pure-protobuf` and `typing-validation`. CARv1 files are now
   indexed by reading only the section headers, like CARv2 files; blocks are
-  no longer hashed unless `verify=True` is given.
+  no longer hashed unless `verify=True` is given. The tests use `ipfsspec`
+  from PyPI instead of `ipldstore` to build and cross-check car files.
 
 ### Internal changes
 

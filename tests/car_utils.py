@@ -1,7 +1,7 @@
 """Helpers to build small UnixFS DAGs and write them into CAR files."""
 
 import dag_cbor
-from ipldstore.unixfsv1 import Data, DataType, PBLink, PBNode
+from ipfsspec.unixfsv1 import Data, DataType, PBLink, PBNode
 from multiformats import CID, multihash, varint
 
 SHA256 = multihash.get("sha2-256")
@@ -57,18 +57,17 @@ def write_carv1(filename, roots, blocks):
         f.write(carv1_bytes(roots, blocks))
 
 
-def assert_matches_ipldstore(carfile):
+def assert_matches_ipfsspec(carfile):
     """Check car_referencer's CARv1 reader and UnixFS decoder against
-    ipldstore for all blocks in ``carfile``. Returns the number of decoded
+    ipfsspec for all blocks in ``carfile``. Returns the number of decoded
     dag-pb blocks."""
-    import ipldstore
-    from ipldstore import unixfsv1
+    from ipfsspec import car, unixfsv1
 
     import car_referencer.index as idx
     from car_referencer import unixfs
 
     with open(carfile, "rb") as f:
-        _, blocks = ipldstore.car.read_car(f)
+        _, blocks = car.read_car(f)
         expected = [
             (cid, data, loc.payload_offset, loc.payload_size)
             for cid, data, loc in blocks

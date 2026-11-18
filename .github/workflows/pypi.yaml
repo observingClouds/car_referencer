@@ -1,0 +1,58 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v6
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Check distribution metadata
+        run: uvx twine check --strict dist/*
+      - name: Check for direct URL dependencies
+        # PyPI rejects packages that depend on e.g. git+https://... URLs
+        run: |
+          uv run --no-project python - <<'PY'
+          import glob, sys, zipfile
+          wheel, = glob.glob("dist/*.whl")
+          with zipfile.ZipFile(wheel) as z:
+              meta, = [n for n in z.namelist() if n.endswith(".dist-info/METADATA")]
+              requires = [
+                  line for line in z.read(meta).decode().splitlines()
+                  if line.startswith("Requires-Dist:") and " @ " in line
+              ]
+          for line in requires:
+              print(f"::warning::PyPI does not accept direct URL dependencies: {line}")
+          if requires and "${{ github.event_name }}" == "release":
+              sys.exit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/car_referencer
+    permissions:
+      id-token: write  # trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

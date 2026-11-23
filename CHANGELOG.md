@@ -22,7 +22,7 @@
 
 ### Dependencies
 
-- Drop support for Python 3.10; Python 3.11 is now the minimum. Python 3.15
+- Drop support for Python 3.10; Python 3.11 is now the minimum. Python 3.14
   is tested in CI.
 - `ipldstore` is no longer a dependency. car_referencer reads CARv1 files
   and decodes dag-pb/UnixFS nodes itself. This also removes the pins of
